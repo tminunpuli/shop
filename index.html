@@ -142,16 +142,13 @@ footer{border-top:1px solid var(--line);background:var(--ground)}
 .ccard[aria-pressed="true"] .cc::before{content:"● ";color:var(--ai)}
 /* ---- 照片放大 ---- */
 .pimg .zw{display:block;overflow:hidden;background:var(--kinu)}
-.pimg .zw img{transition:transform .25s ease}
-@media (hover:hover) and (pointer:fine){
-  .pimg .zw{cursor:zoom-in}
-  .pimg.zoom .zw img{transform:scale(2.2)}
-  .gal .big{cursor:zoom-in}
-  .gal .big.zoom img{transform:scale(2.6)}
-}
-.gal .big img{transition:transform .2s ease}
-.gal .big.zoom{cursor:zoom-out}
-.gal .big.zoom img{transform:scale(2.6)}
+.pimg .zw img{transition:transform .5s ease}
+.card:hover .pimg .zw img{transform:scale(1.06)}
+/* 對話框：圓形放大鏡 */
+.gal .big{position:relative;cursor:crosshair;touch-action:none}
+.lens{position:absolute;width:180px;height:180px;border-radius:50%;pointer-events:none;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line-strong),0 8px 24px rgba(42,38,34,.28);background-repeat:no-repeat;background-color:var(--surface);transform:translate(-50%,-50%);opacity:0;transition:opacity .15s;z-index:3}
+.lens.on{opacity:1}
+@media (max-width:520px){.lens{width:140px;height:140px}}
 .zhint{font-size:12px;color:var(--muted);letter-spacing:.06em;text-align:center}
 /* ---- 關於我們／店家資訊 ---- */
 .about{border-top:1px solid var(--line);background:var(--surface)}
@@ -243,7 +240,7 @@ header{background-color:rgba(242,237,226,.94);backdrop-filter:blur(6px)}
 
 <div class="ov" id="ov" hidden>
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pTitle">
-    <div class="gal"><div class="big" id="pBigBox"><img id="pBig" alt=""></div><div class="zhint" id="pHint"></div><div class="ths" id="pThs"></div></div>
+    <div class="gal"><div class="big" id="pBigBox"><img id="pBig" alt=""><div class="lens" id="pLens" aria-hidden="true"></div></div><div class="zhint" id="pHint"></div><div class="ths" id="pThs"></div></div>
     <div class="info">
       <div class="top"><span class="kicker" id="pCat"></span><button class="btn" id="pClose">關閉</button></div>
       <h2 id="pTitle"></h2>
@@ -332,15 +329,6 @@ function renderAbout(){
   $("about").hidden=!($("aStory").textContent||rows.length||soc.length);
 }
 
-/* ---- 商品照片：滑鼠移過放大，跟著游標看細節 ---- */
-function bindZoom(box,img,getHi){
-  if(!FINE) return;
-  let hi=false;
-  box.addEventListener("mouseenter",()=>{if(!hi&&getHi){hi=true;const id=getHi();if(id&&!isURL(id))setImg(img,id,1600)}box.classList.add("zoom")});
-  box.addEventListener("mousemove",e=>{const r=box.getBoundingClientRect();img.style.transformOrigin=`${(e.clientX-r.left)/r.width*100}% ${(e.clientY-r.top)/r.height*100}%`});
-  box.addEventListener("mouseleave",()=>{box.classList.remove("zoom")});
-}
-
 function render(){
   const store=S["店名"]||"熊肯作織布的家";
   document.title=store;
@@ -400,26 +388,39 @@ function render(){
   }).join("");
   g.querySelectorAll(".card").forEach(b=>{
     b.onclick=()=>{location.hash=b.dataset.code};
-    const p=PRODUCTS.find(x=>x.code===b.dataset.code),box=b.querySelector(".pimg");
-    bindZoom(box,box.querySelector("img"),()=>p.photos[0]);
   });
 }
 $("q").oninput=()=>{render()};
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter")go("products")});
 $("sort").onchange=render;
 
-/* 對話框大圖：電腦滑過放大；手機點一下放大、再點一下還原 */
-const bigBox=$("pBigBox"),bigImg=$("pBig");
-bindZoom(bigBox,bigImg,null);
-if(!FINE){
-  bigBox.addEventListener("click",e=>{const r=bigBox.getBoundingClientRect();bigImg.style.transformOrigin=`${(e.clientX-r.left)/r.width*100}% ${(e.clientY-r.top)/r.height*100}%`;bigBox.classList.toggle("zoom")});
+/* 對話框大圖：圓形放大鏡，跟著滑鼠（手機用手指按住拖動） */
+const bigBox=$("pBigBox"),bigImg=$("pBig"),lens=$("pLens");
+const ZOOM=2.5;
+function lensAt(cx,cy){
+  const box=bigBox.getBoundingClientRect(),ir=bigImg.getBoundingClientRect();
+  const nw=bigImg.naturalWidth,nh=bigImg.naturalHeight;
+  if(!nw||!nh){lens.classList.remove("on");return}
+  // 圖片用 contain 排版，算出實際畫面上的圖片範圍
+  const sc=Math.min(ir.width/nw,ir.height/nh),w=nw*sc,h=nh*sc,l=ir.left+(ir.width-w)/2,t=ir.top+(ir.height-h)/2;
+  const x=cx-l,y=cy-t;
+  if(x<0||y<0||x>w||y>h){lens.classList.remove("on");return}
+  const r=lens.offsetWidth/2;
+  lens.style.left=(cx-box.left)+"px";lens.style.top=(cy-box.top)+"px";
+  lens.style.backgroundImage=`url("${bigImg.currentSrc||bigImg.src}")`;
+  lens.style.backgroundSize=`${w*ZOOM}px ${h*ZOOM}px`;
+  lens.style.backgroundPosition=`${r-x*ZOOM}px ${r-y*ZOOM}px`;
+  lens.classList.add("on");
 }
-$("pHint").textContent=FINE?"滑鼠移到照片上可放大看細節":"點一下照片放大，再點一下還原";
+bigBox.addEventListener("pointermove",e=>lensAt(e.clientX,e.clientY));
+bigBox.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"){bigBox.setPointerCapture(e.pointerId)}lensAt(e.clientX,e.clientY)});
+["pointerleave","pointerup","pointercancel"].forEach(ev=>bigBox.addEventListener(ev,e=>{if(ev!=="pointerup"||e.pointerType!=="mouse")lens.classList.remove("on")}));
+$("pHint").textContent=FINE?"滑鼠移到照片上，用放大鏡看細節":"手指按住照片並移動，用放大鏡看細節";
 
 function openProduct(code){
   const p=PRODUCTS.find(x=>x.code===code);
   if(!p){if(PRODUCTS.length){toast("找不到這件商品，可能已下架");history.replaceState(null,"",location.pathname+location.search)}return}
-  const show=k=>{bigBox.classList.remove("zoom");setImg(bigImg,p.photos[k],1600);bigImg.alt=productName(p);$("pThs").querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-pressed",j===k))};
+  const show=k=>{lens.classList.remove("on");setImg(bigImg,p.photos[k],1600);bigImg.alt=productName(p);$("pThs").querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-pressed",j===k))};
   $("pThs").innerHTML=p.photos.length>1?p.photos.map((id,k)=>`<button aria-label="第 ${k+1} 張">${imgTag(id,160,"",false)}</button>`).join(""):"";
   $("pThs").querySelectorAll("button").forEach((b,k)=>b.onclick=()=>show(k));
   show(0);
