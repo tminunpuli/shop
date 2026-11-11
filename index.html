@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熊肯作織布的家</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{
+  /* 前台：電商式版面，頂部店名＋搜尋＋分類列，下方商品格；靛藍為主色、茜紅標示織紋 */
+  --bg:#f1f2f6;--surface:#fff;--ink:#1b1e2b;--muted:#5b6074;--line:#d8dbe5;
+  --accent:#3346a8;--weave:#b0303d;
+  --font-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{--bg:#11131a;--surface:#1a1d27;--ink:#e7e8ef;--muted:#9a9fb3;--line:#2d3142;--accent:#93a1f2;--weave:#e57a85;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55}
+button,input,select{font:inherit;color:inherit}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ann{background:var(--ink);color:var(--bg);text-align:center;font-size:13px;padding:7px 16px}
+header{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.hin{max-width:1240px;margin:0 auto;padding:14px 20px;display:flex;gap:12px 24px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;margin-right:auto}
+.brand a{font-family:var(--font-display);font-size:24px;color:var(--ink);text-decoration:none;letter-spacing:.06em}
+.brand span{font-size:12px;color:var(--muted)}
+#q{width:min(340px,100%);padding:9px 14px;border:1px solid var(--line);border-radius:99px;background:var(--bg)}
+.cats{max-width:1240px;margin:0 auto;padding:0 20px;display:flex;gap:2px;overflow-x:auto}
+.cats button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;cursor:pointer;white-space:nowrap;color:var(--muted);font-size:14px}
+.cats button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:700}
+.cats small{margin-left:3px;font-variant-numeric:tabular-nums;font-weight:400;color:var(--muted)}
+main{max-width:1240px;margin:0 auto;padding:20px 20px 60px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.pat[aria-pressed="true"]{background:var(--weave);border-color:var(--weave);color:#fff}
+.lbl{font-size:13px;color:var(--muted)}
+select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:28px 20px;margin-top:14px}
+@media (max-width:520px){.grid{grid-template-columns:1fr 1fr;gap:20px 12px}}
+.card{background:none;border:0;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.pimg{position:relative;aspect-ratio:4/5;background:var(--surface);border-radius:6px;overflow:hidden}
+.pimg img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.card:hover .pimg img{transform:scale(1.04)}
+.badge{position:absolute;top:8px;left:8px;font-size:11px;padding:2px 8px;border-radius:4px;background:var(--surface);color:var(--ink);font-weight:700}
+.badge.sold{background:var(--ink);color:var(--bg)}
+.more{position:absolute;bottom:8px;right:8px;font-size:11px;padding:1px 7px;border-radius:4px;background:rgba(0,0,0,.55);color:#fff}
+.nm{font-size:14px;line-height:1.4}
+.pt{font-size:12px;color:var(--weave)}
+.pr{font-weight:700;font-variant-numeric:tabular-nums}
+.pr.ask{font-weight:400;color:var(--muted);font-size:13px}
+.empty{padding:60px 20px;text-align:center;color:var(--muted);grid-column:1/-1}
+footer{border-top:1px solid var(--line);background:var(--surface)}
+.fin{max-width:1240px;margin:0 auto;padding:24px 20px;font-size:13px;color:var(--muted);display:flex;gap:8px 24px;flex-wrap:wrap;justify-content:space-between}
+.ov{position:fixed;inset:0;background:rgba(10,12,20,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.dlg{background:var(--surface);border-radius:12px;max-width:1000px;width:100%;max-height:94%;overflow:auto;display:grid;grid-template-columns:1.15fr 1fr}
+@media (max-width:760px){.dlg{grid-template-columns:1fr}}
+.gal{background:var(--bg);display:flex;flex-direction:column;gap:8px;padding:12px}
+.big{aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px;background:var(--surface)}
+.big img{width:100%;height:100%;object-fit:contain}
+.ths{display:flex;gap:6px;overflow-x:auto}
+.ths button{border:2px solid transparent;padding:0;border-radius:4px;overflow:hidden;cursor:pointer;flex:0 0 64px;height:64px;background:none}
+.ths button[aria-pressed="true"]{border-color:var(--ink)}
+.ths img{width:100%;height:100%;object-fit:cover}
+.info{padding:24px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.info h2{font-size:22px;margin:0;line-height:1.35;text-wrap:balance}
+.price{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.price.ask{font-size:16px;font-weight:400;color:var(--muted)}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0}
+.spec span:nth-child(odd){color:var(--muted)}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.body{white-space:pre-wrap;max-width:60ch}
+.contact{background:var(--bg);border-radius:8px;padding:12px 14px;font-size:14px;white-space:pre-wrap}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){.btn.primary{color:#11131a}}
+.btn.big{padding:12px 18px;font-size:15px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60}
+.demo{background:#fbefd6;color:#7a4e00;text-align:center;font-size:13px;padding:6px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="demo" id="demo" hidden>示範模式：目前顯示的是假商品。在 config.js 填入資料庫網址後就會顯示真的商品。</div>
+<div class="ann" id="ann" hidden></div>
+<header>
+  <div class="hin">
+    <div class="brand"><a href="#" id="name">熊肯作織布的家</a><span id="tag"></span></div>
+    <input type="search" id="q" placeholder="搜尋商品、紋樣、商品編號" aria-label="搜尋商品">
+  </div>
+  <nav class="cats" id="cats" aria-label="商品分類"></nav>
+</header>
+<main>
+  <div class="bar">
+    <div class="chips" id="subs"></div>
+    <label class="lbl" for="sort" style="display:flex;gap:6px;align-items:center">排序
+      <select id="sort"><option value="new">最新上架</option><option value="low">價格低到高</option><option value="high">價格高到低</option></select>
+    </label>
+  </div>
+  <div class="bar"><div class="chips" id="pats"></div></div>
+  <div class="lbl" id="count"></div>
+  <div class="grid" id="grid"><div class="empty">商品載入中…</div></div>
+</main>
+<footer><div class="fin" id="foot"></div></footer>
+
+<div class="ov" id="ov" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="gal"><div class="big"><img id="pBig" alt=""></div><div class="ths" id="pThs"></div></div>
+    <div class="info">
+      <div class="top"><span class="pill" id="pCat"></span><button class="btn" id="pClose">關閉</button></div>
+      <h2 id="pTitle"></h2>
+      <div class="price" id="pPrice"></div>
+      <div class="spec" id="pSpec"></div>
+      <div class="body" id="pBody"></div>
+      <button class="btn primary big" id="pAsk">詢問購買</button>
+      <div class="contact" id="pContact" hidden></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+const API=(window.SHOP_API_URL||"").trim();
+let S={},CATS=[],PRODUCTS=[];
+let selMain="",selCat="",selPat="";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"NT$ "+Number(n).toLocaleString("zh-TW");
+function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)}
+
+/* Google 雲端硬碟照片網址（主要＋備用） */
+function imgURL(id,w){return /^(data:|blob:|https?:)/.test(id)?id:`https://lh3.googleusercontent.com/d/${id}=w${w}`}
+function imgTag(id,w,alt,lazy){
+  if(!id) return `<img alt="${esc(alt)}">`;
+  const fb=/^(data:|blob:|https?:)/.test(id)?"":`this.onerror=null;this.src='https://drive.google.com/thumbnail?id=${esc(id)}&sz=w${w}'`;
+  return `<img src="${esc(imgURL(id,w))}" alt="${esc(alt)}"${lazy?' loading="lazy"':""}${fb?` onerror="${fb}"`:""}>`;
+}
+function setImg(el,id,w){el.onerror=null;el.src=imgURL(id,w);if(!/^(data:|blob:|https?:)/.test(id))el.onerror=()=>{el.onerror=null;el.src=`https://drive.google.com/thumbnail?id=${id}&sz=w${w}`}}
+
+const catOf=code=>CATS.find(c=>c.code===code);
+function productName(p){
+  if(p.name) return p.name;
+  const c=catOf(p.cat);
+  return (p.pattern?p.pattern+" ":"")+(c?c.name:"")||p.code;
+}
+const hasPrice=p=>p.price!==null&&p.price!==""&&p.price!==undefined&&!isNaN(p.price);
+
+function render(){
+  document.title=S["店名"]||"熊肯作織布的家";
+  $("name").textContent=S["店名"]||"熊肯作織布的家";
+  $("tag").textContent=S["標語"]||"";
+  $("ann").hidden=!S["公告"];$("ann").textContent=S["公告"]||"";
+  $("foot").innerHTML=`<span>${esc(S["頁尾"]||("© "+new Date().getFullYear()+" "+(S["店名"]||"")))}</span><span>詢問購買時請附上商品編號</span>`;
+  // 大類
+  const mains=[];
+  for(const c of CATS){if(!mains.some(m=>m.main===c.main))mains.push({main:c.main,name:c.mainName})}
+  const cnt=m=>PRODUCTS.filter(p=>(catOf(p.cat)||{}).main===m).length;
+  const navs=[{k:"",name:"全部",n:PRODUCTS.length},...mains.map(m=>({k:m.main,name:m.name,n:cnt(m.main)})).filter(m=>m.n)];
+  if(!navs.some(n=>n.k===selMain)) selMain="";
+  $("cats").innerHTML=navs.map(n=>`<button data-k="${esc(n.k)}" aria-pressed="${n.k===selMain}">${esc(n.name)}<small>${n.n}</small></button>`).join("");
+  $("cats").querySelectorAll("button").forEach(b=>b.onclick=()=>{selMain=b.dataset.k;selCat="";selPat="";render()});
+  const inMain=PRODUCTS.filter(p=>!selMain||(catOf(p.cat)||{}).main===selMain);
+  // 類別
+  const subs=selMain?CATS.filter(c=>c.main===selMain).map(c=>({k:c.code,name:c.name,n:inMain.filter(p=>p.cat===c.code).length})).filter(s=>s.n):[];
+  if(!subs.some(s=>s.k===selCat)) selCat="";
+  $("subs").innerHTML=subs.length>1?[`<button class="chip" data-k="" aria-pressed="${!selCat}">全部</button>`,...subs.map(s=>`<button class="chip" data-k="${esc(s.k)}" aria-pressed="${s.k===selCat}">${esc(s.name)}</button>`)].join(""):"";
+  $("subs").querySelectorAll("button").forEach(b=>b.onclick=()=>{selCat=b.dataset.k;render()});
+  const inCat=inMain.filter(p=>!selCat||p.cat===selCat);
+  // 織紋
+  const pats=[...new Set(inCat.map(p=>p.pattern).filter(Boolean))];
+  if(!pats.includes(selPat)) selPat="";
+  $("pats").innerHTML=pats.length?[`<span class="lbl">織紋</span>`,`<button class="chip pat" data-k="" aria-pressed="${!selPat}">不限</button>`,...pats.map(t=>`<button class="chip pat" data-k="${esc(t)}" aria-pressed="${t===selPat}">${esc(t)}</button>`)].join(""):"";
+  $("pats").querySelectorAll("button").forEach(b=>b.onclick=()=>{selPat=b.dataset.k;render()});
+  let list=inCat.filter(p=>!selPat||p.pattern===selPat);
+  const q=$("q").value.trim().toLowerCase();
+  if(q) list=list.filter(p=>[productName(p),p.code,p.desc,(p.tags||[]).join(" "),p.pattern,(catOf(p.cat)||{}).name].join(" ").toLowerCase().includes(q));
+  const sort=$("sort").value;
+  list.sort((a,b)=>{
+    if(sort==="new") return String(b.created).localeCompare(String(a.created))||a.code.localeCompare(b.code);
+    const pa=hasPrice(a)?+a.price:null,pb=hasPrice(b)?+b.price:null;
+    if(pa==null&&pb==null)return 0;if(pa==null)return 1;if(pb==null)return -1;
+    return sort==="low"?pa-pb:pb-pa;
+  });
+  $("count").textContent=PRODUCTS.length?`${list.length} 件商品`:"";
+  const g=$("grid");
+  if(!PRODUCTS.length){g.innerHTML=`<div class="empty">商品準備中，請稍後再來看看。</div>`;return}
+  if(!list.length){g.innerHTML=`<div class="empty">沒有符合的商品，換個分類或關鍵字試試。</div>`;return}
+  g.innerHTML=list.map(p=>{
+    const st=p.status==="售完"?'<span class="badge sold">售完</span>':p.status==="預購"?'<span class="badge">預購</span>':"";
+    return `<button class="card" data-code="${esc(p.code)}"><span class="pimg">${imgTag(p.photos[0],600,productName(p),true)}${st}${p.photos.length>1?`<span class="more">${p.photos.length} 張</span>`:""}</span>
+      <span class="nm">${esc(productName(p))}</span>${p.pattern?`<span class="pt">${esc(p.pattern)}</span>`:""}
+      ${hasPrice(p)?`<span class="pr">${money(p.price)}</span>`:`<span class="pr ask">價格請洽詢</span>`}</button>`;
+  }).join("");
+  g.querySelectorAll(".card").forEach(b=>b.onclick=()=>{location.hash=b.dataset.code});
+}
+$("q").oninput=render;$("sort").onchange=render;
+
+function openProduct(code){
+  const p=PRODUCTS.find(x=>x.code===code);
+  if(!p){if(PRODUCTS.length){toast("找不到這件商品，可能已下架");history.replaceState(null,"",location.pathname+location.search)}return}
+  const show=k=>{setImg($("pBig"),p.photos[k],1400);$("pBig").alt=productName(p);$("pThs").querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-pressed",j===k))};
+  $("pThs").innerHTML=p.photos.length>1?p.photos.map((id,k)=>`<button aria-label="第 ${k+1} 張">${imgTag(id,160,"",false)}</button>`).join(""):"";
+  $("pThs").querySelectorAll("button").forEach((b,k)=>b.onclick=()=>show(k));
+  show(0);
+  const c=catOf(p.cat);
+  $("pCat").textContent=c?c.mainName+" › "+c.name:"";
+  $("pTitle").textContent=productName(p);
+  $("pPrice").textContent=hasPrice(p)?money(p.price):"價格請洽詢";$("pPrice").className="price"+(hasPrice(p)?"":" ask");
+  const spec=[["商品編號",p.code],["狀態",p.status||"現貨"],p.pattern&&["織紋",p.pattern],(p.tags||[]).length&&["標籤",p.tags.join("、")]].filter(Boolean);
+  $("pSpec").innerHTML=spec.map(([k,v])=>`<span>${esc(k)}</span><span${k==="商品編號"?' class="code"':""}>${esc(v)}</span>`).join("");
+  $("pBody").textContent=p.desc||"";
+  const sold=p.status==="售完";
+  $("pAsk").disabled=sold;$("pAsk").textContent=sold?"已售完":"詢問購買";
+  $("pContact").hidden=true;
+  $("pAsk").onclick=()=>{
+    const link=S["聯絡連結"]&&/^https:\/\//i.test(S["聯絡連結"])?S["聯絡連結"]:"";
+    const box=$("pContact");
+    box.innerHTML=`<div>${esc(S["聯絡說明"]||"請透過下方方式與我們聯絡。")}</div><div style="margin-top:8px">商品編號 <b class="code">${esc(p.code)}</b></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${link?`<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">${esc(S["聯絡按鈕文字"]||"前往聯絡")}</a>`:""}<button class="btn" id="pCopy">複製商品編號</button></div>`;
+    box.hidden=false;
+    $("pCopy").onclick=async()=>{try{await navigator.clipboard.writeText(p.code+" "+productName(p));toast("已複製商品編號")}catch{toast("請手動記下 "+p.code)}};
+  };
+  $("ov").hidden=false;$("pClose").focus();
+}
+function closeProduct(){$("ov").hidden=true;if(location.hash)history.replaceState(null,"",location.pathname+location.search)}
+$("pClose").onclick=closeProduct;
+$("ov").addEventListener("click",e=>{if(e.target===$("ov"))closeProduct()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("ov").hidden)closeProduct()});
+function route(){const h=decodeURIComponent(location.hash.slice(1));if(h)openProduct(h);else $("ov").hidden=true}
+window.addEventListener("hashchange",route);
+
+/* 示範資料 */
+function demo(){
+  const swatch=(i)=>{const c=document.createElement("canvas");c.width=480;c.height=600;const x=c.getContext("2d");const hues=[355,215,30,160,280,10];x.fillStyle=`hsl(${hues[i%6]},42%,${38+(i%3)*6}%)`;x.fillRect(0,0,480,600);x.strokeStyle="rgba(255,255,255,.85)";x.lineWidth=5;
+    for(let r=0;r<10;r++)for(let k=0;k<6;k++){const cx=k*90+(r%2?45:0),cy=r*66;x.beginPath();x.moveTo(cx,cy-28);x.lineTo(cx+30,cy);x.lineTo(cx,cy+28);x.lineTo(cx-30,cy);x.closePath();x.stroke()}
+    return c.toDataURL("image/jpeg",.75)};
+  const cats=[["A","包包","AA","後背包"],["A","包包","AB","側背包"],["A","包包","AE","零錢包"],["B","飾品","BA","耳環"],["B","飾品","BF","手鍊"],["C","衣服","CB","背心"],["D","造型編織物","DB","娃娃"],["E","圍巾","EA","長巾"]];
+  CATS=cats.map((c,i)=>({main:c[0],mainName:c[1],code:c[2],name:c[3],show:true,order:i}));
+  const items=[["AB001","菱紋手織側背包",1680,"現貨","菱紋織"],["AB002","",1280,"預購","斜紋織"],["AA001","山紋後背包",2480,"現貨","山形紋"],["AE003","小零錢包",380,"售完","菱形紋"],["BA001","織帶耳環",450,"現貨",""],["BF002","手鍊",null,"現貨","線條紋"],["CB004","傳統紋樣背心",3200,"現貨","菱紋織"],["DB010","織布娃娃",680,"預購",""],["EA002","長巾",1500,"現貨","平織"]];
+  PRODUCTS=items.map((it,i)=>({code:it[0],cat:it[0].slice(0,2),name:it[1],price:it[2],status:it[3],listed:true,pattern:it[4],desc:"手工織布製作，每件紋樣略有不同。",tags:["手織"],photos:i===0?[swatch(i),swatch(i+3)]:[swatch(i)],created:new Date(Date.now()-i*864e5).toISOString()}));
+  S={"店名":"熊肯作織布的家","標語":"手織布與織品商品","聯絡說明":"喜歡的商品請記下商品編號，透過下方方式與我們聯絡。"};
+}
+
+(async()=>{
+  if(!API){$("demo").hidden=false;demo();render();route();return}
+  try{
+    const r=await fetch(API+(API.includes("?")?"&":"?")+"action=shop");
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error||"讀取失敗");
+    S=d.settings||{};CATS=d.categories||[];PRODUCTS=(d.products||[]).filter(p=>p.photos&&p.photos.length);
+    render();route();
+  }catch(e){
+    $("grid").innerHTML=`<div class="empty">商品暫時無法載入，請稍後重新整理。</div>`;
+  }
+})();
+</script>
+</body>
+</html>
