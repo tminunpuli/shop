@@ -108,6 +108,21 @@ footer{border-top:1px solid var(--line);background:var(--ground)}
 .nav button{background:none;border:0;padding:6px 10px;cursor:pointer;font-family:var(--font-serif);font-size:15px;letter-spacing:.14em;color:var(--muted)}
 .nav button:hover{color:var(--ink)}
 @media (max-width:720px){.nav{display:none}.hin{padding:14px 16px 10px}}
+/* ---- 商品分類下拉選單 ---- */
+.dd{position:relative}
+.caret{display:inline-block;width:6px;height:6px;margin-left:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-3px) rotate(45deg);transition:transform .2s}
+.dd:hover .caret,.dd.open .caret{transform:translateY(0) rotate(-135deg)}
+.mega{position:absolute;top:100%;left:-12px;z-index:30;padding-top:10px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .18s,transform .18s,visibility .18s}
+.dd:hover .mega,.dd.open .mega,.dd:focus-within .mega{opacity:1;visibility:visible;transform:none}
+.mega .in{background-color:var(--ground);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow-dialog);padding:18px 20px 16px;display:grid;grid-template-columns:repeat(var(--mcols,3),minmax(140px,1fr));gap:18px 28px;width:max-content;max-width:min(760px,calc(100vw - 40px))}
+.mega .col{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mega .mh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:none;border:0;border-bottom:1px dashed var(--stitch);padding:2px 0 6px;margin-bottom:4px;cursor:pointer;text-align:left;font-family:var(--font-serif);font-size:15px;font-weight:600;letter-spacing:.14em;color:var(--ink)}
+.mega .mh small,.mega .si small{font-family:var(--font-sans);font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted);font-variant-numeric:tabular-nums}
+.mega .si{display:flex;justify-content:space-between;gap:10px;background:none;border:0;padding:4px 0;cursor:pointer;text-align:left;font-size:14px;letter-spacing:.06em;color:var(--muted)}
+.mega .mh:hover,.mega .si:hover,.mega .mh:focus-visible,.mega .si:focus-visible{color:var(--ai)}
+.mega .si:hover small{color:var(--ai)}
+.mega .all{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;display:flex;justify-content:flex-end}
+.mega .all button{background:none;border:0;cursor:pointer;font-size:13px;letter-spacing:.1em;color:var(--ai);text-decoration:underline;text-underline-offset:4px}
 /* ---- Banner 形象圖 ---- */
 .hero{position:relative;height:clamp(340px,52vw,600px);overflow:hidden;background:var(--kinu);border-bottom:1px solid var(--line)}
 .hero .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease}
@@ -195,7 +210,7 @@ header{background-color:rgba(242,237,226,.94);backdrop-filter:blur(6px)}
 <header>
   <div class="hin">
     <div class="brand"><a href="#" id="name">熊肯作織布的家</a><span id="tag"></span></div>
-    <nav class="nav" aria-label="頁面導覽"><button data-go="catsec">商品分類</button><button data-go="products">商品一覽</button><button data-go="about">關於我們</button></nav>
+    <nav class="nav" aria-label="頁面導覽"><div class="dd" id="dd"><button data-go="catsec" id="ddBtn" aria-haspopup="true" aria-expanded="false">商品分類<span class="caret" aria-hidden="true"></span></button><div class="mega" id="mega" role="menu"></div></div><button data-go="products">商品一覽</button><button data-go="about">關於我們</button></nav>
     <label class="search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg><input type="search" id="q" placeholder="搜尋商品、紋樣、商品編號" aria-label="搜尋商品"></label>
   </div>
 </header>
@@ -266,7 +281,32 @@ const NUM=["壹","貳","參","肆","伍","陸","柒","捌","玖","拾","拾壹",
 const FINE=matchMedia("(hover:hover) and (pointer:fine)").matches;
 function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)}
 function go(id){const el=$(id);if(el)el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}
-document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+document.querySelectorAll("[data-go]").forEach(b=>{if(b.id!=="ddBtn")b.onclick=()=>go(b.dataset.go)});
+/* 商品分類下拉選單：滑鼠移過去展開；觸控裝置點一下展開、再點一下前往分類區 */
+const dd=$("dd");
+$("ddBtn").onclick=()=>{
+  if(!FINE&&!dd.classList.contains("open")){dd.classList.add("open");$("ddBtn").setAttribute("aria-expanded","true");return}
+  closeMega();go("catsec");
+};
+dd.addEventListener("mouseenter",()=>$("ddBtn").setAttribute("aria-expanded","true"));
+dd.addEventListener("mouseleave",()=>$("ddBtn").setAttribute("aria-expanded","false"));
+document.addEventListener("click",e=>{if(!dd.contains(e.target))closeMega()});
+dd.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMega();$("ddBtn").focus()}});
+function closeMega(){dd.classList.remove("open");$("ddBtn").setAttribute("aria-expanded","false");if(dd.contains(document.activeElement))document.activeElement.blur()}
+function pickCat(main,cat){selMain=main;selCat=cat||"";selPat="";closeMega();render();go("products")}
+function renderMega(){
+  const mains=[];
+  for(const c of CATS){
+    const subs=PRODUCTS.filter(p=>p.cat===c.code).length;
+    let m=mains.find(x=>x.main===c.main);
+    if(!m){m={main:c.main,name:c.mainName,n:0,subs:[]};mains.push(m)}
+    m.n+=subs;if(subs)m.subs.push({code:c.code,name:c.name,n:subs});
+  }
+  const list=mains.filter(m=>m.n);
+  $("mega").style.setProperty("--mcols",Math.min(4,Math.max(1,list.length)));
+  $("mega").innerHTML=list.length?`<div class="in">${list.map(m=>`<div class="col"><button class="mh" data-m="${esc(m.main)}" role="menuitem">${esc(m.name)}<small>${m.n}</small></button>${m.subs.length>1?m.subs.map(s=>`<button class="si" data-m="${esc(m.main)}" data-c="${esc(s.code)}" role="menuitem">${esc(s.name)}<small>${s.n}</small></button>`).join(""):""}</div>`).join("")}<div class="all"><button data-all="1" role="menuitem">看全部商品 →</button></div></div>`:"";
+  $("mega").querySelectorAll("button").forEach(b=>b.onclick=e=>{e.stopPropagation();b.dataset.all?pickCat("",""):pickCat(b.dataset.m,b.dataset.c)});
+}
 $("name").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
 
 /* Google 雲端硬碟照片網址（主要＋備用） */
@@ -376,7 +416,7 @@ function render(){
     return sort==="low"?pa-pb:pb-pa;
   });
   $("count").textContent=PRODUCTS.length?`${list.length} 件商品`:"";
-  renderAbout();
+  renderAbout();renderMega();
   const g=$("grid");
   if(!PRODUCTS.length){g.innerHTML=`<div class="empty">商品準備中，請稍後再來看看。</div>`;return}
   if(!list.length){g.innerHTML=`<div class="empty">沒有符合的商品，換個分類或關鍵字試試。</div>`;return}
