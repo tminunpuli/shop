@@ -392,7 +392,9 @@ function render(){
   const inM=m=>PRODUCTS.filter(p=>(catOf(p.cat)||{}).main===m);
   const navs=[{k:"",name:"全部",list:PRODUCTS},...mains.map(m=>({k:m.main,name:m.name,list:inM(m.main)})).filter(m=>m.list.length)];
   if(!navs.some(n=>n.k===selMain)) selMain="";
-  const cover=n=>{const c=n.list.find(p=>p.photos&&p.photos[0]);return c?c.photos[0]:""};
+  // 分類代表圖：後台有指定就用指定的，否則用該分類第一件商品的照片
+  let covers={};try{const c=JSON.parse(S["分類代表圖"]||"{}");if(c&&typeof c==="object")covers=c}catch{}
+  const cover=n=>{if(n.k&&covers[n.k])return covers[n.k];const c=n.list.find(p=>p.photos&&p.photos[0]);return c?c.photos[0]:""};
   $("cats").innerHTML=navs.map((n,i)=>{
     let im;
     if(!n.k){const ph=navs.slice(1,5).map(cover).filter(Boolean);while(ph.length<4&&PRODUCTS[ph.length])ph.push(PRODUCTS[ph.length].photos[0]);im=`<span class="cimg all">${ph.slice(0,4).map(id=>imgTag(id,300,"",true)).join("")}</span>`}
